@@ -1,0 +1,182 @@
+{
+  "name": "AI Study Guide Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Study Guide Generator",
+        "formDescription": "Paste your study notes below and get back a structured study guide with a summary, key points, MCQs, short-answer questions, formulas, exam tips and a revision plan.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Subject / Topic",
+              "fieldName": "topic",
+              "placeholder": "e.g. Photosynthesis, World War II, Newton's Laws"
+            },
+            {
+              "fieldLabel": "Study Notes",
+              "fieldType": "textarea",
+              "fieldName": "notes",
+              "placeholder": "Paste your full study notes here...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Generate Study Guide",
+          "path": "study-guide"
+        }
+      },
+      "id": "5c7b6f2c-6885-44bd-947b-a9958bb6ab19",
+      "name": "Submit Study Notes",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "b38bb697-1119-4ec2-9840-c60a5058a8cd"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject/Topic: {{ $json.topic || \"Not specified\" }}\n\nStudy Notes:\n{{ $json.notes }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert AI Study Assistant. Analyze the provided study notes and generate a well-structured study guide.\n\nFollow these rules exactly:\n1. Create a concise summary (150-250 words).\n2. List the 10 most important key points.\n3. Generate 10 multiple-choice questions (MCQs), each with four options (A, B, C, D).\n4. Clearly indicate the correct answer for each MCQ.\n5. Create 5 short-answer questions.\n6. List important formulas, definitions, or concepts (if any). If none apply, say \"None applicable\".\n7. Highlight common exam mistakes students make on this topic.\n8. Suggest a 30-minute revision plan based on the content, broken into timed blocks.\n9. Use simple, easy-to-understand English.\n10. Format the entire output using clear Markdown headings and bullet points.\n\nBase everything strictly on the provided notes. Do not invent facts that contradict the notes. Use the following exact section headings, in order:\n\n# Study Guide: <topic>\n## 1. Summary\n## 2. Key Points\n## 3. Multiple-Choice Questions (MCQs)\n## 4. Short-Answer Questions\n## 5. Important Formulas, Definitions & Concepts\n## 6. Common Exam Mistakes\n## 7. 30-Minute Revision Plan"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "63799a9d-3c21-43ec-882b-abd570b7bb3c",
+      "name": "Generate Study Guide",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "2a4cb084-4955-4485-a1eb-a700bd72329a",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.text }}",
+        "destinationKey": "html",
+        "options": {
+          "simpleLineBreaks": true,
+          "tables": true
+        }
+      },
+      "id": "71474bcf-7fe3-42a7-92c6-8e41bea7fa76",
+      "name": "Markdown to HTML",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        576,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "=<div style=\"max-width:800px;margin:0 auto;padding:24px;font-family:sans-serif;line-height:1.6;text-align:left;\">{{ $json.html }}</div>"
+      },
+      "id": "30bc1c49-2b54-4e27-b15b-eb508c23eafe",
+      "name": "Show Study Guide",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        800,
+        112
+      ],
+      "webhookId": "76ac8903-8a51-46e1-b200-9a28345acacd"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Submit Study Notes": {
+      "main": [
+        [
+          {
+            "node": "Generate Study Guide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Study Guide": {
+      "main": [
+        [
+          {
+            "node": "Markdown to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Study Guide",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown to HTML": {
+      "main": [
+        [
+          {
+            "node": "Show Study Guide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "940b329d-d6fa-4c83-b755-1e6d32b611da",
+  "meta": {
+    "instanceId": "9d8409ad1626ebd461337d555d9f5b25da753acdb88274ede77491c2998cb376"
+  },
+  "nodeGroups": [],
+  "id": "FJ8RAnoq77G4A1Ja",
+  "tags": []
+}
