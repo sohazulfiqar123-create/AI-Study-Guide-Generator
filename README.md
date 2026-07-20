@@ -41,9 +41,6 @@ AI Study Guide
 ↓
 Display Result
 
-## 📸 Screenshot
-
-(Add a screenshot of your workflow here.)
 
 ## 📄 License
 
